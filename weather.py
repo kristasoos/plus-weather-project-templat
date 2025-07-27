@@ -120,15 +120,22 @@ def load_data_from_csv(csv_file):
         A list of lists, where each sublist is a (non-empty) line in the csv file.
     """
 
+    # 1. Open the csv file
+    
+    if not csv_file:
+        return []   
     data = []
     with open(csv_file, mode='r') as file:
+     # 2. Read the file and store the data in a list
         reader = csv.reader(file)
-        next(reader)  # Skip header row
+    # 3. Skip the header row
+        next(reader)
         for row in reader:
             if row:  # Skip empty rows
-    # Convert all values to float except the date (first column)
+    # 4. Convert all values to float except the date (first column)
                 converted_row = [row[0]] + [float(x) for x in row[1:]]
                 data.append(converted_row)
+    # 5. Return the data as a list of lists
     return data
 
 print(repr(load_data_from_csv("tests/data/example_one.csv")))
@@ -143,6 +150,21 @@ def find_min(weather_data):
     Returns:
         The minimum value and it's position in the list. (In case of multiple matches, return the index of the *last* example in the list.)
     """
+    # 1. Check if the input is empty
+    # 2. If empty, return an empty tuple
+    # 3. If not empty, find the minimum value and its index
+ 
+    if not weather_data:
+        return ()
+    min_value = float(weather_data[0])
+    min_index = 0
+    for i, value in enumerate(weather_data):
+        value = float(value)
+        if value <= min_value:
+            min_value = value
+            min_index = i
+    # 4. Return the minimum value and its index as a tuple 
+    return (min_value, min_index)
 
 
 
@@ -155,7 +177,18 @@ def find_max(weather_data):
     Returns:
         The maximum value and it's position in the list. (In case of multiple matches, return the index of the *last* example in the list.)
     """
-    pass
+    if not weather_data:
+        return ()
+    max_value = float(weather_data[0])
+    max_index = 0
+    for i, value in enumerate(weather_data):
+        value = float(value)
+        if value >= max_value:
+            max_value = value
+            max_index = i
+    # Return the maximum value and its index as a tuple
+   
+    return (max_value, max_index)
 
 
 def generate_summary(weather_data):
@@ -166,7 +199,30 @@ def generate_summary(weather_data):
     Returns:
         A string containing the summary information.
     """
-    pass
+    if not weather_data:
+        return "No data provided.\n"
+
+    num_days = len(weather_data)
+    min_temps = [day[1] for day in weather_data]
+    max_temps = [day[2] for day in weather_data]
+
+    min_temp, min_index = find_min(min_temps)
+    max_temp, max_index = find_max(max_temps)
+
+    min_date = convert_date(weather_data[min_index][0])
+    max_date = convert_date(weather_data[max_index][0])
+
+    mean_low = calculate_mean(min_temps)
+    mean_high = calculate_mean(max_temps)
+
+    summary = (
+        f"{num_days} Day Overview\n"
+        f"  The lowest temperature will be {format_temperature(f'{min_temp:.1f}')} and will occur on {min_date}.\n"
+        f"  The highest temperature will be {format_temperature(f'{max_temp:.1f}')} and will occur on {max_date}.\n"
+        f"  The average low this week is {format_temperature(f'{mean_low:.1f}')}.\n"
+        f"  The average high this week is {format_temperature(f'{mean_high:.1f}')}.\n"
+    )
+    return summary
 
 
 def generate_daily_summary(weather_data):
@@ -177,4 +233,17 @@ def generate_daily_summary(weather_data):
     Returns:
         A string containing the summary information.
     """
-    pass
+    if not weather_data:
+        return "No data provided.\n"
+
+    summary = ""
+    for day in weather_data:
+        date = convert_date(day[0])
+        min_temp = format_temperature(f"{day[1]:.1f}")
+        max_temp = format_temperature(f"{day[2]:.1f}")
+        summary += (
+            f"---- {date} ----\n"
+            f"  Minimum Temperature: {min_temp}\n"
+            f"  Maximum Temperature: {max_temp}\n\n"
+        )
+    return summary
