@@ -1,5 +1,6 @@
 import csv
 from datetime import datetime
+import weather
 
 DEGREE_SYMBOL = u"\N{DEGREE SIGN}C"
 
@@ -14,8 +15,9 @@ def format_temperature(temp):
     Returns:
         A string contain the temperature and "degrees Celcius."
     """
-    temp=input("What is the temperature in Celsius today: ")
+    # temp=input("What is the temperature in Celsius today: ")
     return f"{temp}{DEGREE_SYMBOL}"
+
 
 
 def convert_date(iso_string):
@@ -67,7 +69,7 @@ def convert_f_to_c(temp_in_fahrenheit):
 
  # Call the function
 temp_in_f = "90"
-# print(convert_f_to_c(temp_in_f))
+print(convert_f_to_c(temp_in_f))
 # expected_result = 32.2
 
 
@@ -199,12 +201,15 @@ def generate_summary(weather_data):
     Returns:
         A string containing the summary information.
     """
+     
     if not weather_data:
         return "No data provided.\n"
 
     num_days = len(weather_data)
-    min_temps = [day[1] for day in weather_data]
-    max_temps = [day[2] for day in weather_data]
+    # Convert all temperatures from F to C for summary
+    min_temps = [convert_f_to_c(day[1]) for day in weather_data]
+    max_temps = [convert_f_to_c(day[2]) for day in weather_data]
+               
 
     min_temp, min_index = find_min(min_temps)
     max_temp, max_index = find_max(max_temps)
@@ -217,12 +222,22 @@ def generate_summary(weather_data):
 
     summary = (
         f"{num_days} Day Overview\n"
-        f"  The lowest temperature will be {format_temperature(f'{min_temp:.1f}')} and will occur on {min_date}.\n"
-        f"  The highest temperature will be {format_temperature(f'{max_temp:.1f}')} and will occur on {max_date}.\n"
+        f"  The lowest temperature will be {format_temperature(f'{min_temp:.1f}')}, and will occur on {min_date}.\n"
+        f"  The highest temperature will be {format_temperature(f'{max_temp:.1f}')}, and will occur on {max_date}.\n"
         f"  The average low this week is {format_temperature(f'{mean_low:.1f}')}.\n"
         f"  The average high this week is {format_temperature(f'{mean_high:.1f}')}.\n"
     )
     return summary
+
+
+for filename in [
+    "tests/data/example_one.csv",
+    "tests/data/example_two.csv",
+    "tests/data/example_three.csv"
+]:
+    data = load_data_from_csv(filename)
+    print(generate_summary(data))
+    print("-" * 40)
 
 
 def generate_daily_summary(weather_data):
@@ -236,14 +251,24 @@ def generate_daily_summary(weather_data):
     if not weather_data:
         return "No data provided.\n"
 
+
     summary = ""
     for day in weather_data:
         date = convert_date(day[0])
-        min_temp = format_temperature(f"{day[1]:.1f}")
-        max_temp = format_temperature(f"{day[2]:.1f}")
+        min_temp_c = format_temperature(f"{convert_f_to_c(day[1]):.1f}")
+        max_temp_c = format_temperature(f"{convert_f_to_c(day[2]):.1f}")
         summary += (
             f"---- {date} ----\n"
-            f"  Minimum Temperature: {min_temp}\n"
-            f"  Maximum Temperature: {max_temp}\n\n"
+            f"  Minimum Temperature: {min_temp_c}\n"
+            f"  Maximum Temperature: {max_temp_c}\n\n"
         )
     return summary
+
+for filename in [
+    "tests/data/example_one.csv",
+    "tests/data/example_two.csv",
+    "tests/data/example_three.csv"
+]:
+    data = load_data_from_csv(filename)
+    print(generate_daily_summary(data))
+    print("-" * 40)
